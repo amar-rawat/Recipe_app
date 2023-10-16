@@ -3,49 +3,50 @@ import 'package:recipe_app/models/recipe_api.dart';
 import 'package:recipe_app/models/recipe_model.dart';
 import 'package:recipe_app/pages/widgets/recipe_card.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  List<Recipe> _recipes = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    getRecipes();
-  }
-
-  Future<void> getRecipes() async {
-    _recipes = await RecipeApi.getRecipe();
-    setState(() {
-      _isLoading = false;
-    });
-    print(_recipes);
+  Future<List<Recipe>> getRecipes() async {
+    List<Recipe> recipes = await RecipeApi.getRecipe();
+    return recipes;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Icon(Icons.restaurant_menu),
-          SizedBox(
-            width: 10,
-          ),
-          Text('Food Recipe')
-        ]),
-      ),
-      body: RecipeCard(
-          title: 'My Recipe',
-          ratings: '4.3',
-          cookTime: '12 min',
-          imageUrl:
-              "https://plus.unsplash.com/premium_photo-1676637000058-96549206fe71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"),
-    );
+        appBar: AppBar(
+          title:
+              const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Icon(Icons.restaurant_menu),
+            SizedBox(
+              width: 10,
+            ),
+            Text('Food Recipe')
+          ]),
+        ),
+        body: FutureBuilder(
+          future: getRecipes(),
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.done:
+                print(snapshot.data);
+                return ListView.builder(
+                  itemCount: (snapshot.data as List<Recipe>).length,
+                  itemBuilder: (BuildContext context, int index) => RecipeCard(
+                    title: (snapshot.data as List<Recipe>)[index].name,
+                    ratings: (snapshot.data as List<Recipe>)[index]
+                        .rating
+                        .toString(),
+                    cookTime: (snapshot.data as List<Recipe>)[index].totalTime,
+                    imageUrl: (snapshot.data as List<Recipe>)[index].images,
+                  ),
+                );
+              default:
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+            }
+          },
+        ));
   }
 }
