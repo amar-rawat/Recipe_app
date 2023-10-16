@@ -13,14 +13,17 @@ class RecipeApi {
     });
 
     Map data = jsonDecode(response.body);
-    print(data);
-    List _temp = [];
+    List temp = [];
     for (var i in data['feed']) {
-      if (i['content'] != null && i['content']['details'] != null) {
-        _temp.add(i['content']['details']);
-        if (_temp.length == 4) break;
+      if (i['content']['details'] != null) {
+        temp.add(i['content']['details']);
+        if (temp.length == 23) break;
+      } else if (i['content']['details'] == null) {
+        for (var k in i['content']['matches']['feed']) {
+          temp.add(k['content']['details']);
+        }
       }
     }
-    return Recipe.recipesFromSnapshot(_temp);
+    return Recipe.recipesFromSnapshot(temp);
   }
 }

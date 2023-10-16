@@ -29,7 +29,6 @@ class HomePage extends StatelessWidget {
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.done:
-                print(snapshot.data);
                 return ListView.builder(
                   itemCount: (snapshot.data as List<Recipe>).length,
                   itemBuilder: (BuildContext context, int index) => RecipeCard(
